@@ -1,2 +1,3 @@
 *.exe
-/SegmentTree_zipped.h
+*.json
+/SegmentTree/SegmentTree_zipped.h
