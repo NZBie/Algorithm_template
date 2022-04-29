@@ -1,3 +1,10 @@
+/*
+ * @Author: NZB 
+ * @Date: 2022-04-27 20:27:51 
+ * @Last Modified by: NZB
+ * @Last Modified time: 2022-04-29 22:29:31
+ */
+
 #include "SegmentTree.h"
 
 #include <cstring>

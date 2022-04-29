@@ -1,3 +1,10 @@
+/*
+ * @Author: NZB 
+ * @Date: 2022-04-26 23:28:17 
+ * @Last Modified by: NZB
+ * @Last Modified time: 2022-04-29 22:29:04
+ */
+
 #ifndef SEGMENTTREE_H
 #define SEGMENTTREE_H
 
