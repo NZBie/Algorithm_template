@@ -1,4 +1,4 @@
 *.exe
 /.vscode/*
 /test.cpp
-/SegmentTree/SegmentTree_zipped.h
+/*/tempCodeRunnerFile.cpp

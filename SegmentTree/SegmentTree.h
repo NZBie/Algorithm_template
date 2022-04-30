@@ -29,8 +29,8 @@ public:
 
 private:
     class SegTreeNode;          // 内部节点类
-    SegTreeNode* _root;         // 头节点
     unsigned _dataSize;         // 数据量
+    SegTreeNode* const _root;   // 根节点
     Type (*_addition_point)(c_Type&, c_Type&);          // 函数指针，指向Type类加法函数的指针
 
     Type addition(c_Type& x, c_Type& y);                // Type类 加法函数
@@ -50,8 +50,8 @@ public:
 
 private:
     index _l, _r;               // 该节点的区间范围
-    SegTreeNode* _lChld;        // 左子节点
-    SegTreeNode* _rChld;        // 右子节点
+    SegTreeNode* const _lChld;  // 左子节点
+    SegTreeNode* const _rChld;  // 右子节点
     SegmentTree* _tree;         // 所属线段树类的指针
 
     bool _isLazyWork;           // 懒标记是否可用

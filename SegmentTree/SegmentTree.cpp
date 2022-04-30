@@ -21,9 +21,9 @@ Trace error(true);
 **/
 template<typename Type>
 SegmentTree<Type>::SegmentTree(unsigned dataSize, c_Type* const dataList, Type (*func)(c_Type&, c_Type&))
-: _dataSize(dataSize), _addition_point(func) {
-    if(_dataSize == 0) _root = nullptr;
-    else _root = new SegTreeNode(0, _dataSize-1, dataList, this);
+: _dataSize(dataSize), _addition_point(func),
+_root((_dataSize == 0) ? nullptr : new SegTreeNode(0, _dataSize-1, dataList, this)) {
+    debug.print("外部类 SegmentTree 调用 构造");
 }
 
 /**
@@ -33,7 +33,6 @@ template<typename Type>
 SegmentTree<Type>::~SegmentTree() {
     debug.print("外部类 SegmentTree 调用 析构");
     delete _root;
-    _root = nullptr;
 }
 
 /**
@@ -121,25 +120,19 @@ Type SegmentTree<Type>::multiplyBasedAdd(Type tmp, unsigned num) {
 **/
 template<typename Type>
 SegmentTree<Type>::SegTreeNode::SegTreeNode(index l, index r, c_Type* const dataList, SegmentTree *tree)
-: _l(l), _r(r), _isLazyWork(false), _lazyType(addend), _tree(tree) {
-
-	// 初始化
-    // memset(&_lazyTag, 0, sizeof(_lazyTag));
+: _l(l), _r(r), _isLazyWork(false), _lazyType(addend), _tree(tree),
+_lChld((l == r) ? nullptr : new SegmentTree<Type>::SegTreeNode(l, (l + r) >> 1, dataList, tree)),
+_rChld((l == r) ? nullptr : new SegmentTree<Type>::SegTreeNode(((l + r) >> 1) + 1, r, dataList, tree)) {
+    debug.print("内部类 SegTreeNode 调用 构造");
 
     // 叶子节点
     if(l == r) {
-        _lChld = _rChld = nullptr;
         if(dataList != nullptr) _data = dataList[l];
         else memset(&_data, 0, sizeof(_data));
     }
 
     // 非叶子节点
-    else {
-        index mid = (l + r) >> 1;
-        _lChld = new SegmentTree<Type>::SegTreeNode(l, mid, dataList, tree);
-        _rChld = new SegmentTree<Type>::SegTreeNode(mid + 1, r, dataList, tree);
-        _data = _tree->addition(_lChld->_data, _rChld->_data);
-    }
+    else _data = _tree->addition(_lChld->_data, _rChld->_data);
 }
 
 /**
@@ -221,7 +214,6 @@ void SegmentTree<Type>::SegTreeNode::lazyTag_down() {
     }
 
     // 清除懒标记
-    // memset(&_lazyTag, 0, sizeof(_lazyTag));
     _isLazyWork = false;
 }
 
@@ -247,6 +239,7 @@ void SegmentTree<Type>::SegTreeNode::updateData(c_Type& val, c_uptType type) {
         _lazyTag = val;
     }
 
+    // 启用懒标记
     _isLazyWork = true;
     _lazyType = type;
 }
