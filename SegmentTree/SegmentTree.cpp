@@ -2,7 +2,7 @@
  * @Author: NZB 
  * @Date: 2022-04-27 20:27:51 
  * @Last Modified by: NZB
- * @Last Modified time: 2022-04-29 22:29:31
+ * @Last Modified time: 2022-04-30 19:54:43
  */
 
 #include "SegmentTree.h"
@@ -15,12 +15,12 @@ Trace error(true);
 
 /**
  *	@brief  SegmentTree类 构造函数
- *	@param	unsigned dataSize           : 数据总量，为空代表0
- *	@param  Type* dataList              : 初始数据，为空代表初始值为全0
- *	@param  Type (*func)(Type, Type)    : 自定义加法函数，为空代表调用默认“+”运算符
+ *	@param	unsigned dataSize                       : 数据总量，为空代表0
+ *	@param  const Type* const dataList              : 初始数据，为空代表初始值为全0
+ *	@param  Type (*func)(const Type&, const Type&)  : 自定义加法函数，为空代表调用默认“+”运算符
 **/
 template<typename Type>
-SegmentTree<Type>::SegmentTree(unsigned dataSize, Type* dataList, Type (*func)(Type, Type))
+SegmentTree<Type>::SegmentTree(unsigned dataSize, c_Type* const dataList, Type (*func)(c_Type&, c_Type&))
 : _dataSize(dataSize), _addition_point(func) {
     if(_dataSize == 0) _root = nullptr;
     else _root = new SegTreeNode(0, _dataSize-1, dataList, this);
@@ -38,14 +38,14 @@ SegmentTree<Type>::~SegmentTree() {
 
 /**
  *	@brief  SegmentTree类 接口函数，修改、查询 的功能
- *	@param	index l         : 区间左边界
- *	@param  index r         : 区间右边界
- *	@param  index pos       : 单点位置
- *	@param  Type val        : 变化量 覆盖量
- *	@param  updateType type : 更新方式 变化或覆盖
+ *	@param	index l             : 区间左边界
+ *	@param  index r             : 区间右边界
+ *	@param  index pos           : 单点位置
+ *	@param  const Type val      : 变化量 覆盖量
+ *	@param  const uptType type  : 更新方式 变化或覆盖
 **/
 template<typename Type>
-void SegmentTree<Type>::update(index l, index r, Type val, updateType type) {
+void SegmentTree<Type>::update(index l, index r, c_Type& val, c_uptType type) {
     if(!(l <= r && 0 <= l && r < _dataSize)) {
         error.print("Error: update(l, r, val, type) 请检查参数范围");
         return;
@@ -53,7 +53,7 @@ void SegmentTree<Type>::update(index l, index r, Type val, updateType type) {
     _root->updateNode(l, r, val, type);
 }
 template<typename Type>
-void SegmentTree<Type>::update(index pos, Type val, updateType type) {
+void SegmentTree<Type>::update(index pos, c_Type& val, c_uptType type) {
     if(!(0 <= pos && pos < _dataSize)) {
         error.print("Error: update(pos, val, type) 请检查参数范围");
         return;
@@ -83,11 +83,11 @@ Type SegmentTree<Type>::query(index pos) {
 
 /**
  *	@brief  Type类 默认加法函数, 在用户不额外提供 加法函数 的情况下，调用 Type类 本身的"+"加法运算符
- *	@param	Type x  : 加数1
- *	@param  Type y  : 加数2
+ *	@param	const Type& x   : 加数1
+ *	@param  const Type& y   : 加数2
 **/
 template<typename Type>
-Type SegmentTree<Type>::addition(Type x, Type y) {
+Type SegmentTree<Type>::addition(c_Type& x, c_Type& y) {
     if(_addition_point == nullptr) return x + y;
     else return (*_addition_point)(x, y);
 }
@@ -114,12 +114,13 @@ Type SegmentTree<Type>::multiplyBasedAdd(Type tmp, unsigned num) {
 
 /**
  *	@brief  SegTreeNode类 构造函数
- *	@param	index l             : 区间左边界
- *	@param  index r             : 区间右边界
- *	@param  SegmentTree *tree   : 所属线段树类的指针
+ *	@param	index l                     : 区间左边界
+ *	@param  index r                     : 区间右边界
+ *	@param  const Type* const dataList  : 初始数据
+ *	@param  SegmentTree *tree           : 所属线段树类的指针
 **/
 template<typename Type>
-SegmentTree<Type>::SegTreeNode::SegTreeNode(index l, index r, Type* dataList, SegmentTree *tree)
+SegmentTree<Type>::SegTreeNode::SegTreeNode(index l, index r, c_Type* const dataList, SegmentTree *tree)
 : _l(l), _r(r), _isLazyWork(false), _lazyType(addend), _tree(tree) {
 
 	// 初始化
@@ -155,14 +156,14 @@ SegmentTree<Type>::SegTreeNode::~SegTreeNode() {
 
 /**
  *	@brief  更新区间[l, r]内所有数据的值
- *	@param	index l         : 区间左边界
- *	@param  index r         : 区间右边界
- *	@param  Type val        : 变化量 覆盖量
- *	@param  updateType type : 更新方式 变化或覆盖
+ *	@param	index l             : 区间左边界
+ *	@param  index r             : 区间右边界
+ *	@param  const Type val      : 变化量 覆盖量
+ *	@param  const uptType type  : 更新方式 变化或覆盖
  *	@return null
 **/
 template<typename Type>
-void SegmentTree<Type>::SegTreeNode::updateNode(index l, index r, Type val, updateType type) {
+void SegmentTree<Type>::SegTreeNode::updateNode(index l, index r, c_Type& val, c_uptType type) {
 
     // 区间完全覆盖
 	if(l <= _l && _r <= r) {
@@ -226,12 +227,12 @@ void SegmentTree<Type>::SegTreeNode::lazyTag_down() {
 
 /**
  *	@brief  节点的数据更新 data 和 lazyTag
- *	@param  Type val        : 变化量 覆盖量
- *	@param  updateType type : 更新方式 变化或覆盖
+ *	@param  const Type val      : 变化量 覆盖量
+ *	@param  const uptType type  : 更新方式 变化或覆盖
  *	@return null
 **/
 template<typename Type>
-void SegmentTree<Type>::SegTreeNode::updateData(Type val, updateType type) {
+void SegmentTree<Type>::SegTreeNode::updateData(c_Type& val, c_uptType type) {
 
     // 对区间内的值 加上变化量
     if(type == addend) {

@@ -1,9 +1,3 @@
-/*
- * @Author: NZB 
- * @Date: 2022-04-29 22:29:54 
- * @Last Modified by:   NZB 
- * @Last Modified time: 2022-04-29 22:29:54 
- */
 
 // https://www.luogu.com.cn/problem/SP1716
 
@@ -76,4 +70,5 @@ int main()
             tree.update(l, mat, cover);
         }
     }
+    return 0;
 }
