@@ -47,7 +47,7 @@ SegmentTree<Type>::~SegmentTree() {
 template<typename Type>
 void SegmentTree<Type>::update(index l, index r, Type val, updateType type) {
     if(!(l <= r && 0 <= l && r < _dataSize)) {
-        error.print("Error: update(l, r, val) Çë¼ì²é²ÎÊý·¶Î§");
+        error.print("Error: update(l, r, val, type) Çë¼ì²é²ÎÊý·¶Î§");
         return;
     }
     _root->updateNode(l, r, val, type);
@@ -55,7 +55,7 @@ void SegmentTree<Type>::update(index l, index r, Type val, updateType type) {
 template<typename Type>
 void SegmentTree<Type>::update(index pos, Type val, updateType type) {
     if(!(0 <= pos && pos < _dataSize)) {
-        error.print("Error: update(pos, val) Çë¼ì²é²ÎÊý·¶Î§");
+        error.print("Error: update(pos, val, type) Çë¼ì²é²ÎÊý·¶Î§");
         return;
     }
     _root->updateNode(pos, pos, val, type);
