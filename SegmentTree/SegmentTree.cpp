@@ -15,9 +15,9 @@ Trace error(true);
 
 /**
  *	@brief  SegmentTree类 构造函数
- *	@param	unsigned dataSize           : 数据总量
- *	@param  Type* dataList              : 数据
- *	@param  Type (*func)(Type, Type)    : 自定义加法函数
+ *	@param	unsigned dataSize           : 数据总量，为空代表0
+ *	@param  Type* dataList              : 初始数据，为空代表初始值为全0
+ *	@param  Type (*func)(Type, Type)    : 自定义加法函数，为空代表调用默认“+”运算符
 **/
 template<typename Type>
 SegmentTree<Type>::SegmentTree(unsigned dataSize, Type* dataList, Type (*func)(Type, Type))
@@ -37,7 +37,12 @@ SegmentTree<Type>::~SegmentTree() {
 }
 
 /**
- *	@brief  SegmentTree类 接口函数
+ *	@brief  SegmentTree类 接口函数，修改、查询 的功能
+ *	@param	index l         : 区间左边界
+ *	@param  index r         : 区间右边界
+ *	@param  index pos       : 单点位置
+ *	@param  Type val        : 变化量 覆盖量
+ *	@param  updateType type : 更新方式 变化或覆盖
 **/
 template<typename Type>
 void SegmentTree<Type>::update(index l, index r, Type val, updateType type) {
@@ -111,7 +116,7 @@ Type SegmentTree<Type>::multiplyBasedAdd(Type tmp, unsigned num) {
  *	@brief  SegTreeNode类 构造函数
  *	@param	index l             : 区间左边界
  *	@param  index r             : 区间右边界
- *	@param  SegmentTree *tree   : // 所属线段树类的指针
+ *	@param  SegmentTree *tree   : 所属线段树类的指针
 **/
 template<typename Type>
 SegmentTree<Type>::SegTreeNode::SegTreeNode(index l, index r, Type* dataList, SegmentTree *tree)
@@ -176,10 +181,6 @@ void SegmentTree<Type>::SegTreeNode::updateNode(index l, index r, Type val, upda
     // 更新当前节点
     _data = _tree->addition(_lChld->_data, _rChld->_data);
 }
-// template<typename Type>
-// void SegmentTree<Type>::SegTreeNode::updateNode(index pos, Type val, updateType type) {
-
-// }
 
 /**
  *	@brief  获取区间[l, r]内所有数据的加和
@@ -204,10 +205,6 @@ Type SegmentTree<Type>::SegTreeNode::queryNode(index l, index r) {
     else if(mid < r) res = _rChld->queryNode(l, r);
 	return res;
 }
-// template<typename Type>
-// Type SegmentTree<Type>::SegTreeNode::queryNode(index pos) {
-
-// }
 
 /**
  *	@brief  下发懒标记

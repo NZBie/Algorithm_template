@@ -15,7 +15,7 @@ template<typename Type>
 class SegmentTree {
 
 public:
-    typedef const unsigned int index;
+    typedef const unsigned int index; // 线段树上的位置信息
     
     SegmentTree(unsigned dataSize = 0, Type* dataList = nullptr, Type (*func)(Type, Type) = nullptr);
     ~SegmentTree();
@@ -44,9 +44,7 @@ public:
     ~SegTreeNode();
 
     void updateNode(index l, index r, Type val, updateType type);   // 区间更新
-    // void updateNode(index pos, Type val, updateType type);          // 单点更新
     Type queryNode(index l, index r);                               // 区间查询
-    // Type queryNode(index pos);                                      // 单点查询
 
 private:
     index _l, _r;               // 该节点的区间范围
