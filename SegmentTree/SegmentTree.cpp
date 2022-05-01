@@ -2,7 +2,7 @@
  * @Author: NZB 
  * @Date: 2022-04-27 20:27:51 
  * @Last Modified by: NZB
- * @Last Modified time: 2022-04-30 19:54:43
+ * @Last Modified time: 2022-05-01 22:47:37
  */
 
 #include "SegmentTree.h"
@@ -14,232 +14,236 @@ Trace debug(false);
 Trace error(true);
 
 /**
- *	@brief  SegmentTreeÀà ¹¹Ôìº¯Êı
- *	@param	unsigned dataSize                       : Êı¾İ×ÜÁ¿£¬Îª¿Õ´ú±í0
- *	@param  const Type* const dataList              : ³õÊ¼Êı¾İ£¬Îª¿Õ´ú±í³õÊ¼ÖµÎªÈ«0
- *	@param  Type (*func)(const Type&, const Type&)  : ×Ô¶¨Òå¼Ó·¨º¯Êı£¬Îª¿Õ´ú±íµ÷ÓÃÄ¬ÈÏ¡°+¡±ÔËËã·û
+ *	@brief	SegmentTreeç±» æ„é€ å‡½æ•°
+ *	@param	c_Tsz dataSize							: æ•°æ®æ€»é‡
+ *	@param	const Type* const dataList				: åˆå§‹æ•°æ®ï¼Œä¸ºç©ºä»£è¡¨åˆå§‹å€¼ä¸ºå…¨0
+ *	@param	Type (*func)(const Type&, const Type&)	: è‡ªå®šä¹‰åŠ æ³•å‡½æ•°ï¼Œä¸ºç©ºä»£è¡¨è°ƒç”¨é»˜è®¤â€œ+â€è¿ç®—ç¬¦
 **/
 template<typename Type>
-SegmentTree<Type>::SegmentTree(unsigned dataSize, c_Type* const dataList, Type (*func)(c_Type&, c_Type&))
-: _dataSize(dataSize), _addition_point(func),
+SegmentTree<Type>::SegmentTree(c_Tsz dataSize, c_Type* const dataList, Type (*func)(c_Type&, c_Type&)): 
+_dataSize((dataSize > max_size) ? 0 : dataSize), _addition_point(func),
 _root((_dataSize == 0) ? nullptr : new SegTreeNode(0, _dataSize-1, dataList, this)) {
-    debug.print("Íâ²¿Àà SegmentTree µ÷ÓÃ ¹¹Ôì");
+	debug.print("å¤–éƒ¨ç±» SegmentTree è°ƒç”¨ æ„é€ ");
+	if(dataSize > max_size) error.print("Error: \"dataSize\"å‚æ•°è®¾ç½®è¿‡å¤§ï¼Œä¸èƒ½è¶…è¿‡\"max_size\"ï¼");
 }
 
 /**
- *	@brief  SegmentTreeÀà Îö¹¹º¯Êı
+ *	@brief	SegmentTreeç±» ææ„å‡½æ•°
 **/
 template<typename Type>
 SegmentTree<Type>::~SegmentTree() {
-    debug.print("Íâ²¿Àà SegmentTree µ÷ÓÃ Îö¹¹");
-    delete _root;
+	debug.print("å¤–éƒ¨ç±» SegmentTree è°ƒç”¨ ææ„");
+	delete _root;
 }
 
 /**
- *	@brief  SegmentTreeÀà ½Ó¿Úº¯Êı£¬ĞŞ¸Ä¡¢²éÑ¯ µÄ¹¦ÄÜ
- *	@param	index l             : Çø¼ä×ó±ß½ç
- *	@param  index r             : Çø¼äÓÒ±ß½ç
- *	@param  index pos           : µ¥µãÎ»ÖÃ
- *	@param  const Type val      : ±ä»¯Á¿ ¸²¸ÇÁ¿
- *	@param  const uptType type  : ¸üĞÂ·½Ê½ ±ä»¯»ò¸²¸Ç
+ *	@brief	SegmentTreeç±» æ¥å£å‡½æ•°ï¼Œä¿®æ”¹ã€æŸ¥è¯¢ çš„åŠŸèƒ½
+ *	@param	c_Tsz l				: åŒºé—´å·¦è¾¹ç•Œ
+ *	@param	c_Tsz r				: åŒºé—´å³è¾¹ç•Œ
+ *	@param	c_Tsz pos			: å•ç‚¹ä½ç½®
+ *	@param	const Type val		: å˜åŒ–é‡ è¦†ç›–é‡
+ *	@param	const uptType type	: æ›´æ–°æ–¹å¼ å˜åŒ–æˆ–è¦†ç›–
 **/
-template<typename Type>
-void SegmentTree<Type>::update(index l, index r, c_Type& val, c_uptType type) {
-    if(!(l <= r && 0 <= l && r < _dataSize)) {
-        error.print("Error: update(l, r, val, type) Çë¼ì²é²ÎÊı·¶Î§");
-        return;
-    }
-    _root->updateNode(l, r, val, type);
+template<typename Type> inline 
+SegmentTree<Type>::Tsz SegmentTree<Type>::size() {
+	return _dataSize;
 }
-template<typename Type>
-void SegmentTree<Type>::update(index pos, c_Type& val, c_uptType type) {
-    if(!(0 <= pos && pos < _dataSize)) {
-        error.print("Error: update(pos, val, type) Çë¼ì²é²ÎÊı·¶Î§");
-        return;
-    }
-    _root->updateNode(pos, pos, val, type);
-}
-template<typename Type>
-Type SegmentTree<Type>::query(index l, index r) {
-    if(!(l <= r && 0 <= l && r < _dataSize)) {
-        error.print("Error: query(l, r) Çë¼ì²é²ÎÊı·¶Î§");
-        Type res;
-        memset(&res, 0, sizeof(res));
-        return res;
-    }
-    return _root->queryNode(l, r);
-}
-template<typename Type>
-Type SegmentTree<Type>::query(index pos) {
-    if(!(0 <= pos && pos < _dataSize)) {
-        error.print("Error: query(pos) Çë¼ì²é²ÎÊı·¶Î§");
-        Type res;
-        memset(&res, 0, sizeof(res));
-        return res;
-    }
-    return _root->queryNode(pos, pos);
-}
-
-/**
- *	@brief  TypeÀà Ä¬ÈÏ¼Ó·¨º¯Êı, ÔÚÓÃ»§²»¶îÍâÌá¹© ¼Ó·¨º¯Êı µÄÇé¿öÏÂ£¬µ÷ÓÃ TypeÀà ±¾ÉíµÄ"+"¼Ó·¨ÔËËã·û
- *	@param	const Type& x   : ¼ÓÊı1
- *	@param  const Type& y   : ¼ÓÊı2
-**/
-template<typename Type>
-Type SegmentTree<Type>::addition(c_Type& x, c_Type& y) {
-    if(_addition_point == nullptr) return x + y;
-    else return (*_addition_point)(x, y);
-}
-
-/**
- *	@brief  TypeÀà ÀÛ¼Óº¯Êı£¬ÀàËÆÓÚ¿ìËÙÃİ
- *	@param	Type tmp        : »ùÊı
- *	@param  unsigned num    : ÀÛ¼Ó´ÎÊı
-**/
-template<typename Type>
-Type SegmentTree<Type>::multiplyBasedAdd(Type tmp, unsigned num) {
-    Type res;
-    bool isInit = false;
-    while(num) {
-        if(num & 1) {
-            if(isInit) res = addition(res, tmp);
-            else res = tmp;
-        }
-        tmp = addition(tmp, tmp);
-        num >>= 1;
-    }
-    return res;
-}
-
-/**
- *	@brief  SegTreeNodeÀà ¹¹Ôìº¯Êı
- *	@param	index l                     : Çø¼ä×ó±ß½ç
- *	@param  index r                     : Çø¼äÓÒ±ß½ç
- *	@param  const Type* const dataList  : ³õÊ¼Êı¾İ
- *	@param  SegmentTree *tree           : ËùÊôÏß¶ÎÊ÷ÀàµÄÖ¸Õë
-**/
-template<typename Type>
-SegmentTree<Type>::SegTreeNode::SegTreeNode(index l, index r, c_Type* const dataList, SegmentTree *tree)
-: _l(l), _r(r), _isLazyWork(false), _lazyType(addend), _tree(tree),
-_lChld((l == r) ? nullptr : new SegmentTree<Type>::SegTreeNode(l, (l + r) >> 1, dataList, tree)),
-_rChld((l == r) ? nullptr : new SegmentTree<Type>::SegTreeNode(((l + r) >> 1) + 1, r, dataList, tree)) {
-    debug.print("ÄÚ²¿Àà SegTreeNode µ÷ÓÃ ¹¹Ôì");
-
-    // Ò¶×Ó½Úµã
-    if(l == r) {
-        if(dataList != nullptr) _data = dataList[l];
-        else memset(&_data, 0, sizeof(_data));
-    }
-
-    // ·ÇÒ¶×Ó½Úµã
-    else _data = _tree->addition(_lChld->_data, _rChld->_data);
-}
-
-/**
- *	@brief  SegTreeNodeÀà Îö¹¹º¯Êı
-**/
-template<typename Type>
-SegmentTree<Type>::SegTreeNode::~SegTreeNode() {
-    debug.print("ÄÚ²¿Àà SegTreeNode µ÷ÓÃ Îö¹¹");
-    if(_lChld) {
-        delete _lChld;
-        delete _rChld;
-    }
-}
-
-/**
- *	@brief  ¸üĞÂÇø¼ä[l, r]ÄÚËùÓĞÊı¾İµÄÖµ
- *	@param	index l             : Çø¼ä×ó±ß½ç
- *	@param  index r             : Çø¼äÓÒ±ß½ç
- *	@param  const Type val      : ±ä»¯Á¿ ¸²¸ÇÁ¿
- *	@param  const uptType type  : ¸üĞÂ·½Ê½ ±ä»¯»ò¸²¸Ç
- *	@return null
-**/
-template<typename Type>
-void SegmentTree<Type>::SegTreeNode::updateNode(index l, index r, c_Type& val, c_uptType type) {
-
-    // Çø¼äÍêÈ«¸²¸Ç
-	if(l <= _l && _r <= r) {
-        updateData(val, type);
+template<typename Type> inline 
+void SegmentTree<Type>::update(c_Tsz l, c_Tsz r, c_Type& val, c_uptType type) {
+	if(!(l <= r && 0 <= l && r < _dataSize)) {
+		error.print("Error: \"update(l, r, val, type)\"è¯·æ£€æŸ¥å‚æ•°èŒƒå›´ï¼");
 		return;
 	}
-
-    // ÀÁ±ê¼ÇÏÂ·¢
-	if(_lazyType) lazyTag_down();
-                    
-    // ¸üĞÂ×óÓÒ×Ó½Úµã
-    index mid = (_l + _r) >> 1;
-    if(l <= mid) _lChld->updateNode(l, r, val, type);
-    if(mid < r) _rChld->updateNode(l, r, val, type);
-
-    // ¸üĞÂµ±Ç°½Úµã
-    _data = _tree->addition(_lChld->_data, _rChld->_data);
+	_root->updateNode(l, r, val, type);
+}
+template<typename Type> inline 
+void SegmentTree<Type>::update(c_Tsz pos, c_Type& val, c_uptType type) {
+	if(!(0 <= pos && pos < _dataSize)) {
+		error.print("Error: \"update(pos, val, type)\" è¯·æ£€æŸ¥å‚æ•°èŒƒå›´ï¼");
+		return;
+	}
+	_root->updateNode(pos, pos, val, type);
+}
+template<typename Type> inline 
+Type SegmentTree<Type>::query(c_Tsz l, c_Tsz r) {
+	if(!(l <= r && 0 <= l && r < _dataSize)) {
+		error.print("Error: \"query(l, r)\" è¯·æ£€æŸ¥å‚æ•°èŒƒå›´ï¼");
+		Type res;
+		memset(&res, 0, sizeof(res));
+		return res;
+	}
+	return _root->queryNode(l, r);
+}
+template<typename Type> inline 
+Type SegmentTree<Type>::query(c_Tsz pos) {
+	if(!(0 <= pos && pos < _dataSize)) {
+		error.print("Error: \"query(pos)\" è¯·æ£€æŸ¥å‚æ•°èŒƒå›´ï¼");
+		Type res;
+		memset(&res, 0, sizeof(res));
+		return res;
+	}
+	return _root->queryNode(pos, pos);
 }
 
 /**
- *	@brief  »ñÈ¡Çø¼ä[l, r]ÄÚËùÓĞÊı¾İµÄ¼ÓºÍ
- *	@param  index l  : Çø¼ä×ó±ß½ç
- *	@param	index r  : Çø¼äÓÒ±ß½ç     
- *	@return Çø¼äÄÚËùÓĞÊı¾İµÄ¼ÓºÍ
+ *	@brief	Typeç±» é»˜è®¤åŠ æ³•å‡½æ•°, åœ¨ç”¨æˆ·ä¸é¢å¤–æä¾› åŠ æ³•å‡½æ•° çš„æƒ…å†µä¸‹ï¼Œè°ƒç”¨ Typeç±» æœ¬èº«çš„"+"åŠ æ³•è¿ç®—ç¬¦
+ *	@param	const Type& x	: åŠ æ•°1
+ *	@param	const Type& y	: åŠ æ•°2
+**/
+template<typename Type> inline 
+Type SegmentTree<Type>::addition(c_Type& x, c_Type& y) {
+	return (_addition_point == nullptr) ? x + y : (*_addition_point)(x, y);
+}
+
+/**
+ *	@brief	Typeç±» ç´¯åŠ å‡½æ•°ï¼Œç±»ä¼¼äºå¿«é€Ÿå¹‚
+ *	@param	Type tmp	: åŸºæ•°
+ *	@param	Tsz num		: ç´¯åŠ æ¬¡æ•°
 **/
 template<typename Type>
-Type SegmentTree<Type>::SegTreeNode::queryNode(index l, index r) {
-
-    // Çø¼äÍêÈ«¸²¸Ç
-	if(l <= _l && _r <= r) return _data;
-
-    // ÀÁ±ê¼ÇÏÂ·¢
-	if(_isLazyWork) lazyTag_down();
-
-    // ºÏ²¢×óÓÒ×Ó½ÚµãµÄÖµ
+Type SegmentTree<Type>::multiplyBasedAdd(Type tmp, Tsz num) {
 	Type res;
-    index mid = (_l + _r) >> 1;
-	if(l <= mid && mid < r) res = _tree->addition(_lChld->queryNode(l, r), _rChld->queryNode(l, r));
-	else if(l <= mid) res = _lChld->queryNode(l, r);
-    else if(mid < r) res = _rChld->queryNode(l, r);
+	bool isInit = false;
+	while(num) {
+		if(num & 1) {
+			if(isInit) res = addition(res, tmp);
+			else res = tmp;
+		}
+		tmp = addition(tmp, tmp);
+		num >>= 1;
+	}
 	return res;
 }
 
 /**
- *	@brief  ÏÂ·¢ÀÁ±ê¼Ç
+ *	@brief	SegTreeNodeç±» æ„é€ å‡½æ•°
+ *	@param	c_Tsz l						: åŒºé—´å·¦è¾¹ç•Œ
+ *	@param	c_Tsz r						: åŒºé—´å³è¾¹ç•Œ
+ *	@param	const Type* const dataList	: åˆå§‹æ•°æ®
+ *	@param	SegmentTree *tree			: æ‰€å±çº¿æ®µæ ‘ç±»çš„æŒ‡é’ˆ
+**/
+template<typename Type>
+SegmentTree<Type>::SegTreeNode::SegTreeNode(c_Tsz l, c_Tsz r, c_Type* const dataList, SegmentTree *tree): 
+_l(l), _r(r), _isLazyWork(false), _lazyType(addend), _tree(tree),
+_lChld((l == r) ? nullptr : new SegmentTree<Type>::SegTreeNode(l, (l + r) >> 1, dataList, tree)),
+_rChld((l == r) ? nullptr : new SegmentTree<Type>::SegTreeNode(((l + r) >> 1) + 1, r, dataList, tree)) {
+	debug.print("å†…éƒ¨ç±» SegTreeNode è°ƒç”¨ æ„é€ ");
+
+	// å¶å­èŠ‚ç‚¹
+	if(l == r) {
+		if(dataList != nullptr) _data = dataList[l];
+		else memset(&_data, 0, sizeof(_data));
+	}
+
+	// éå¶å­èŠ‚ç‚¹
+	else _data = _tree->addition(_lChld->_data, _rChld->_data);
+}
+
+/**
+ *	@brief	SegTreeNodeç±» ææ„å‡½æ•°
+**/
+template<typename Type>
+SegmentTree<Type>::SegTreeNode::~SegTreeNode() {
+	debug.print("å†…éƒ¨ç±» SegTreeNode è°ƒç”¨ ææ„");
+	if(_lChld) {
+		delete _lChld;
+		delete _rChld;
+	}
+}
+
+/**
+ *	@brief	æ›´æ–°åŒºé—´[l, r]å†…æ‰€æœ‰æ•°æ®çš„å€¼
+ *	@param	c_Tsz l				: åŒºé—´å·¦è¾¹ç•Œ
+ *	@param	c_Tsz r				: åŒºé—´å³è¾¹ç•Œ
+ *	@param	const Type val		: å˜åŒ–é‡ è¦†ç›–é‡
+ *	@param	const uptType type	: æ›´æ–°æ–¹å¼ å˜åŒ–æˆ–è¦†ç›–
+ *	@return null
+**/
+template<typename Type>
+void SegmentTree<Type>::SegTreeNode::updateNode(c_Tsz l, c_Tsz r, c_Type& val, c_uptType type) {
+
+	// åŒºé—´å®Œå…¨è¦†ç›–
+	if(l <= _l && _r <= r) {
+		updateData(val, type);
+		return;
+	}
+
+	// æ‡’æ ‡è®°ä¸‹å‘
+	if(_lazyType) lazyTag_down();
+					
+	// æ›´æ–°å·¦å³å­èŠ‚ç‚¹
+	c_Tsz mid = (_l + _r) >> 1;
+	if(l <= mid) _lChld->updateNode(l, r, val, type);
+	if(mid < r) _rChld->updateNode(l, r, val, type);
+
+	// æ›´æ–°å½“å‰èŠ‚ç‚¹
+	_data = _tree->addition(_lChld->_data, _rChld->_data);
+}
+
+/**
+ *	@brief	è·å–åŒºé—´[l, r]å†…æ‰€æœ‰æ•°æ®çš„åŠ å’Œ
+ *	@param	c_Tsz l		: åŒºé—´å·¦è¾¹ç•Œ
+ *	@param	c_Tsz r		: åŒºé—´å³è¾¹ç•Œ	 
+ *	@return åŒºé—´å†…æ‰€æœ‰æ•°æ®çš„åŠ å’Œ
+**/
+template<typename Type>
+Type SegmentTree<Type>::SegTreeNode::queryNode(c_Tsz l, c_Tsz r) {
+
+	// åŒºé—´å®Œå…¨è¦†ç›–
+	if(l <= _l && _r <= r) return _data;
+
+	// æ‡’æ ‡è®°ä¸‹å‘
+	if(_isLazyWork) lazyTag_down();
+
+	// åˆå¹¶å·¦å³å­èŠ‚ç‚¹çš„å€¼
+	c_Tsz mid = (_l + _r) >> 1;
+	if(l <= mid) {
+		if(mid < r) return _tree->addition(_lChld->queryNode(l, r), _rChld->queryNode(l, r));
+		else return _lChld->queryNode(l, r);
+	}
+	else return _rChld->queryNode(l, r);
+}
+
+/**
+ *	@brief	ä¸‹å‘æ‡’æ ‡è®°
  *	@return null
 **/
 template<typename Type>
 void SegmentTree<Type>::SegTreeNode::lazyTag_down() {
-    
-    // ·ÇÒ¶×Ó½Úµã ÏÂ·¢ÀÁ±ê¼Ç
-    if(_lChld) {
-        _lChld->updateData(_lazyTag, _lazyType);
-        _rChld->updateData(_lazyTag, _lazyType);
-    }
+	
+	// éå¶å­èŠ‚ç‚¹ ä¸‹å‘æ‡’æ ‡è®°
+	if(_lChld) {
+		_lChld->updateData(_lazyTag, _lazyType);
+		_rChld->updateData(_lazyTag, _lazyType);
+	}
 
-    // Çå³ıÀÁ±ê¼Ç
-    _isLazyWork = false;
+	// æ¸…é™¤æ‡’æ ‡è®°
+	_isLazyWork = false;
 }
 
 /**
- *	@brief  ½ÚµãµÄÊı¾İ¸üĞÂ data ºÍ lazyTag
- *	@param  const Type val      : ±ä»¯Á¿ ¸²¸ÇÁ¿
- *	@param  const uptType type  : ¸üĞÂ·½Ê½ ±ä»¯»ò¸²¸Ç
+ *	@brief	èŠ‚ç‚¹çš„æ•°æ®æ›´æ–° data å’Œ lazyTag
+ *	@param	const Type val		: å˜åŒ–é‡ è¦†ç›–é‡
+ *	@param	const uptType type	: æ›´æ–°æ–¹å¼ å˜åŒ–æˆ–è¦†ç›–
  *	@return null
 **/
 template<typename Type>
 void SegmentTree<Type>::SegTreeNode::updateData(c_Type& val, c_uptType type) {
 
-    // ¶ÔÇø¼äÄÚµÄÖµ ¼ÓÉÏ±ä»¯Á¿
-    if(type == addend) {
-        _data = _tree->addition(_data, _tree->multiplyBasedAdd(val, _r - _l + 1));
-        if(_isLazyWork) _lazyTag = _tree->addition(_lazyTag, val);
-        else _lazyTag = val;
-    }
+	// å¯¹åŒºé—´å†…çš„å€¼ åŠ ä¸Šå˜åŒ–é‡
+	if(type == addend) {
+		_data = _tree->addition(_data, _tree->multiplyBasedAdd(val, _r - _l + 1));
+		if(_isLazyWork) _lazyTag = _tree->addition(_lazyTag, val);
+		else _lazyTag = val;
+	}
 
-    // ¶ÔÇø¼äÄÚµÄÖµ ¸³Óè¸²¸ÇÁ¿
-    else {
-        _data = _tree->multiplyBasedAdd(val, _r - _l + 1);
-        _lazyTag = val;
-    }
+	// å¯¹åŒºé—´å†…çš„å€¼ èµ‹äºˆè¦†ç›–é‡
+	else {
+		_data = _tree->multiplyBasedAdd(val, _r - _l + 1);
+		_lazyTag = val;
+	}
 
-    // ÆôÓÃÀÁ±ê¼Ç
-    _isLazyWork = true;
-    _lazyType = type;
+	// å¯ç”¨æ‡’æ ‡è®°
+	_isLazyWork = true;
+	_lazyType = type;
 }

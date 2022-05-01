@@ -1,66 +1,70 @@
 /*
- * @Author: NZB 
- * @Date: 2022-04-26 23:28:17 
+ * @Author: NZB
+ * @Date: 2022-04-26 23:28:17
  * @Last Modified by: NZB
- * @Last Modified time: 2022-04-30 17:34:20
+ * @Last Modified time: 2022-05-01 22:50:18
  */
 
 #ifndef SEGMENTTREE_H
 #define SEGMENTTREE_H
 
-enum uptType { addend/*±ä»¯Á¿*/, cover/*¸²¸ÇÁ¿*/ }; // ¶¨Òå¸üĞÂÀàĞÍ
+enum uptType { addend/*å˜åŒ–é‡*/, cover/*è¦†ç›–é‡*/ };	// å®šä¹‰æ›´æ–°ç±»å‹
 
-/* Ïß¶ÎÊ÷ÀàSegmentNode */
+/* çº¿æ®µæ ‘ç±»SegmentNode */
 template<typename Type>
 class SegmentTree {
 
-public:
-    typedef const unsigned int index;   // Ïß¶ÎÊ÷ÉÏµÄÎ»ÖÃĞÅÏ¢
-    typedef const Type c_Type;          // ³£Á¿TypeÊı¾İÀàĞÍ
-    typedef const uptType c_uptType;    // ³£Á¿uptTypeÃ¶¾ÙÀàĞÍ
-    
-    SegmentTree(unsigned dataSize = 0, c_Type* const dataList = nullptr, Type (*func)(c_Type&, c_Type&) = nullptr);
-    ~SegmentTree();
+private:
+	typedef unsigned int Tsz;			// çº¿æ®µæ ‘ä¸Šçš„æœ€å¤§å®¹é‡
+	typedef const Tsz c_Tsz;			// å¸¸é‡Tsz
+	typedef const Type c_Type;			// å¸¸é‡Type
+	typedef const uptType c_uptType;	// å¸¸é‡uptType
 
-    void update(index l, index r, c_Type& val, c_uptType type);     // Çø¼ä¸üĞÂ
-    void update(index pos, c_Type& val, c_uptType type);            // µ¥µã¸üĞÂ
-    Type query(index l, index r);                                   // Çø¼ä²éÑ¯
-    Type query(index pos);                                          // µ¥µã²éÑ¯
+public:
+	SegmentTree(c_Tsz dataSize, c_Type* const dataList = nullptr, Type (*func)(c_Type&, c_Type&) = nullptr);
+	~SegmentTree();
+
+	inline Tsz size();													// è¿”å›çº¿æ®µæ ‘å®¹é‡
+	inline void update(c_Tsz l, c_Tsz r, c_Type& val, c_uptType type);	// åŒºé—´æ›´æ–°
+	inline void update(c_Tsz pos, c_Type& val, c_uptType type);			// å•ç‚¹æ›´æ–°
+	inline Type query(c_Tsz l, c_Tsz r);								// åŒºé—´æŸ¥è¯¢
+	inline Type query(c_Tsz pos);										// å•ç‚¹æŸ¥è¯¢
 
 private:
-    class SegTreeNode;          // ÄÚ²¿½ÚµãÀà
-    unsigned _dataSize;         // Êı¾İÁ¿
-    SegTreeNode* const _root;   // ¸ù½Úµã
-    Type (*_addition_point)(c_Type&, c_Type&);          // º¯ÊıÖ¸Õë£¬Ö¸ÏòTypeÀà¼Ó·¨º¯ÊıµÄÖ¸Õë
+	class SegTreeNode;					// å†…éƒ¨èŠ‚ç‚¹ç±»
+	const static Tsz max_size = 1e6;	// çº¿æ®µæ ‘å…è®¸çš„æœ€å¤§å®¹é‡
+	Tsz _dataSize;						// æ•°æ®é‡
+	SegTreeNode* const _root;			// æ ¹èŠ‚ç‚¹
+	Type (*_addition_point)(c_Type&, c_Type&);		// å‡½æ•°æŒ‡é’ˆï¼ŒæŒ‡å‘Typeç±»åŠ æ³•å‡½æ•°çš„æŒ‡é’ˆ
 
-    Type addition(c_Type& x, c_Type& y);                // TypeÀà ¼Ó·¨º¯Êı
-    Type multiplyBasedAdd(Type tmp, unsigned num);      // TypeÀà ÀÛ¼Óº¯Êı
+	inline Type addition(c_Type& x, c_Type& y);		// Typeç±» åŠ æ³•å‡½æ•°
+	Type multiplyBasedAdd(Type tmp, Tsz num);		// Typeç±» ç´¯åŠ å‡½æ•°
 };
 
-/* SegmentNodeµÄÄÚ²¿ÀàSegTreeNode */
+/* SegmentNodeçš„å†…éƒ¨ç±»SegTreeNode */
 template<typename Type>
 class SegmentTree<Type>::SegTreeNode {
 
 public:
-    SegTreeNode(index l, index r, c_Type* const dataList, SegmentTree* tree);
-    ~SegTreeNode();
+	SegTreeNode(c_Tsz l, c_Tsz r, c_Type* const dataList, SegmentTree* tree);
+	~SegTreeNode();
 
-    void updateNode(index l, index r, c_Type& val, c_uptType type);     // Çø¼ä¸üĞÂ
-    Type queryNode(index l, index r);                                   // Çø¼ä²éÑ¯
+	void updateNode(c_Tsz l, c_Tsz r, c_Type& val, c_uptType type);	// åŒºé—´æ›´æ–°
+	Type queryNode(c_Tsz l, c_Tsz r);								// åŒºé—´æŸ¥è¯¢
 
 private:
-    index _l, _r;               // ¸Ã½ÚµãµÄÇø¼ä·¶Î§
-    SegTreeNode* const _lChld;  // ×ó×Ó½Úµã
-    SegTreeNode* const _rChld;  // ÓÒ×Ó½Úµã
-    SegmentTree* _tree;         // ËùÊôÏß¶ÎÊ÷ÀàµÄÖ¸Õë
+	c_Tsz _l, _r;				// è¯¥èŠ‚ç‚¹çš„åŒºé—´èŒƒå›´
+	SegTreeNode* const _lChld;	// å·¦å­èŠ‚ç‚¹
+	SegTreeNode* const _rChld;	// å³å­èŠ‚ç‚¹
+	SegmentTree* _tree;			// æ‰€å±çº¿æ®µæ ‘ç±»çš„æŒ‡é’ˆ
 
-    bool _isLazyWork;           // ÀÁ±ê¼ÇÊÇ·ñ¿ÉÓÃ
-    uptType _lazyType;          // ÀÁ±ê¼ÇÀàĞÍ
-    Type _data;                 // Êı¾İ
-    Type _lazyTag;              // ÀÁ±ê¼Ç
+	bool _isLazyWork;			// æ‡’æ ‡è®°æ˜¯å¦å¯ç”¨
+	uptType _lazyType;			// æ‡’æ ‡è®°ç±»å‹
+	Type _data;					// æ•°æ®
+	Type _lazyTag;				// æ‡’æ ‡è®°
 
-    void lazyTag_down();                            // ÀÁ±ê¼ÇÏÂ·¢
-    void updateData(c_Type& val, c_uptType type);   // ½ÚµãµÄÊı¾İ¸üĞÂ data ºÍ lazyTag
+	void lazyTag_down();							// æ‡’æ ‡è®°ä¸‹å‘
+	void updateData(c_Type& val, c_uptType type);	// èŠ‚ç‚¹çš„æ•°æ®æ›´æ–° data å’Œ lazyTag
 };
 
 #endif
