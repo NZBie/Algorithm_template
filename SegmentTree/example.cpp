@@ -2,7 +2,6 @@
 // https://www.luogu.com.cn/problem/SP1716
 
 #include <bits/stdc++.h>
-#include "SegmentTree.h"
 #include "SegmentTree.cpp"
 
 using namespace std;

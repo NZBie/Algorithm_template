@@ -7,10 +7,7 @@
 
 #include "SegmentTree.h"
 
-#include <cstring>
-#include "../Trace.h"
-
-Trace debug(false);
+Trace debug(true);
 Trace error(true);
 
 /**
@@ -21,10 +18,23 @@ Trace error(true);
 **/
 template<typename Type>
 SegmentTree<Type>::SegmentTree(c_Tsz dataSize, c_Type* const dataList, Type (*func)(c_Type&, c_Type&)): 
-_dataSize((dataSize > max_size) ? 0 : dataSize), _addition_point(func),
-_root((_dataSize == 0) ? nullptr : new SegTreeNode(0, _dataSize-1, dataList, this)) {
+_dataSize((dataSize > max_size) ? 0 : dataSize), 
+_root((_dataSize == 0) ? nullptr : new SegTreeNode(0, _dataSize-1, dataList, this)),
+_addition_point(func) {
 	debug.print("外部类 SegmentTree 调用 构造");
 	if(dataSize > max_size) error.print("Error: \"dataSize\"参数设置过大，不能超过\"max_size\"！");
+}
+
+/**
+ *	@brief	SegmentTree类 构造函数
+ *	@param	const SegmentTree& tree	: 拷贝对象
+**/
+template<typename Type>
+SegmentTree<Type>::SegmentTree(const SegmentTree<Type>& tree):
+_dataSize(tree._dataSize),
+_root((_dataSize == 0) ? nullptr : new SegTreeNode(*tree._root, this)), 
+_addition_point(tree._addition_point) {
+	debug.print("外部类 SegmentTree 调用 拷贝构造");
 }
 
 /**
@@ -45,7 +55,7 @@ SegmentTree<Type>::~SegmentTree() {
  *	@param	const uptType type	: 更新方式 变化或覆盖
 **/
 template<typename Type> inline 
-SegmentTree<Type>::Tsz SegmentTree<Type>::size() {
+unsigned SegmentTree<Type>::size() {
 	return _dataSize;
 }
 template<typename Type> inline 
@@ -117,15 +127,15 @@ Type SegmentTree<Type>::multiplyBasedAdd(Type tmp, Tsz num) {
 
 /**
  *	@brief	SegTreeNode类 构造函数
- *	@param	c_Tsz l						: 区间左边界
- *	@param	c_Tsz r						: 区间右边界
- *	@param	const Type* const dataList	: 初始数据
- *	@param	SegmentTree *tree			: 所属线段树类的指针
+ *	@param	c_Tsz l							: 区间左边界
+ *	@param	c_Tsz r							: 区间右边界
+ *	@param	const Type* const dataList		: 初始数据
+ *	@param	const SegmentTree<Type>* tree	: 所属线段树类的指针
 **/
 template<typename Type>
 SegmentTree<Type>::SegTreeNode::SegTreeNode(c_Tsz l, c_Tsz r, c_Type* const dataList, SegmentTree *tree): 
-_l(l), _r(r), _isLazyWork(false), _lazyType(addend), _tree(tree),
-_lChld((l == r) ? nullptr : new SegmentTree<Type>::SegTreeNode(l, (l + r) >> 1, dataList, tree)),
+_l(l), _r(r), _tree(tree), _isLazyWork(false), _lazyType(addend), 
+_lChld((l == r) ? nullptr : new SegmentTree<Type>::SegTreeNode(l, (l + r) >> 1, dataList, tree)), 
 _rChld((l == r) ? nullptr : new SegmentTree<Type>::SegTreeNode(((l + r) >> 1) + 1, r, dataList, tree)) {
 	debug.print("内部类 SegTreeNode 调用 构造");
 
@@ -137,6 +147,20 @@ _rChld((l == r) ? nullptr : new SegmentTree<Type>::SegTreeNode(((l + r) >> 1) + 
 
 	// 非叶子节点
 	else _data = _tree->addition(_lChld->_data, _rChld->_data);
+}
+
+/**
+ *	@brief	SegTreeNode类 拷贝构造函数
+ *	@param	const SegTreeNode& node			: 拷贝对象
+ *	@param	const SegmentTree<Type>* tree	: 所属线段树类的指针
+**/
+template<typename Type>
+SegmentTree<Type>::SegTreeNode::SegTreeNode(const SegTreeNode& node, SegmentTree<Type>* tree): 
+_l(node._l), _r(node._r), _tree(tree), _isLazyWork(node._isLazyWork), _lazyType(node._lazyType), 
+_lChld((node._lChld) ? nullptr : new SegmentTree<Type>::SegTreeNode(*node._lChld, tree)), 
+_rChld((node._rChld) ? nullptr : new SegmentTree<Type>::SegTreeNode(*node._rChld, tree)),
+_data(node._data) {
+	debug.print("内部类 SegTreeNode 调用 拷贝构造");
 }
 
 /**

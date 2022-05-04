@@ -8,6 +8,9 @@
 #ifndef SEGMENTTREE_H
 #define SEGMENTTREE_H
 
+#include <cstring>
+#include "../Trace.h"
+
 enum uptType { addend/*变化量*/, cover/*覆盖量*/ };	// 定义更新类型
 
 /* 线段树类SegmentNode */
@@ -19,9 +22,11 @@ private:
 	typedef const Tsz c_Tsz;			// 常量Tsz
 	typedef const Type c_Type;			// 常量Type
 	typedef const uptType c_uptType;	// 常量uptType
+	// typedef SegmentTree<Type> SegTreeType;
 
 public:
 	SegmentTree(c_Tsz dataSize, c_Type* const dataList = nullptr, Type (*func)(c_Type&, c_Type&) = nullptr);
+	SegmentTree(const SegmentTree<Type>& tree);
 	~SegmentTree();
 
 	inline Tsz size();													// 返回线段树容量
@@ -46,7 +51,8 @@ template<typename Type>
 class SegmentTree<Type>::SegTreeNode {
 
 public:
-	SegTreeNode(c_Tsz l, c_Tsz r, c_Type* const dataList, SegmentTree* tree);
+	SegTreeNode(c_Tsz l, c_Tsz r, c_Type* const dataList, SegmentTree<Type>* tree);
+	SegTreeNode(const SegTreeNode& node, SegmentTree<Type>* tree);
 	~SegTreeNode();
 
 	void updateNode(c_Tsz l, c_Tsz r, c_Type& val, c_uptType type);	// 区间更新
@@ -54,12 +60,11 @@ public:
 
 private:
 	c_Tsz _l, _r;				// 该节点的区间范围
-	SegTreeNode* const _lChld;	// 左子节点
-	SegTreeNode* const _rChld;	// 右子节点
 	SegmentTree* _tree;			// 所属线段树类的指针
-
 	bool _isLazyWork;			// 懒标记是否可用
 	uptType _lazyType;			// 懒标记类型
+	SegTreeNode* const _lChld;	// 左子节点
+	SegTreeNode* const _rChld;	// 右子节点
 	Type _data;					// 数据
 	Type _lazyTag;				// 懒标记
 
