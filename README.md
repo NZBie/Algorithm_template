@@ -6,4 +6,4 @@ There are some common templates have been Encapsulated used for ACM in C++.
 #### 更新：
 
 * 2022/4/29: add SegmentTree template
-* 2022/5/01: add DSU(DisjointSetUnion)
+* 2022/5/03: add DSU(DisjointSetUnion)

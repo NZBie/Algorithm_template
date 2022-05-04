@@ -7,9 +7,6 @@
 
 #include "DSU.h"
 
-#include <cstring>
-#include "../Trace.h"
-
 Trace error(true);
 
 /**
@@ -28,10 +25,42 @@ _unionSize((unionSize > max_size) ? 0 : unionSize), _nodes(new Union[_unionSize]
 }
 
 /**
+ *	@brief	并查集 DSU类 的拷贝构造函数
+ *	@param	DSU& dsu	: 拷贝对象
+**/
+DSU::DSU(const DSU& dsu):
+_unionSize(dsu._unionSize), _nodes(new Union[_unionSize]), _set(dsu._set) {
+	for(int i=0;i<_unionSize;i++) {
+		_nodes[i] = dsu._nodes[i];
+	}
+}
+
+/**
  *	@brief	并查集 DSU类 的析构函数
 **/
 DSU::~DSU() {
 	delete [] _nodes;
+}
+
+/**
+ *	@brief	并查集 DSU类 的赋值函数
+ *	@param	DSU& dsu	: 取值对象
+ *	@return	赋值结果
+**/
+DSU DSU::operator = (const DSU& dsu) {
+	DSU dsu_res(dsu);
+	return dsu_res;
+}
+
+/**
+ *	@brief	_set的比较函数，使用于union排序，方便查看并查集的整体情况
+ *	@param	const Union*const& x	: 节点1
+ *	@param	const Union*const& y	: 节点2
+ *	@return	比较结果
+**/
+bool DSU::compare::operator () (const Union*const& x, const Union*const& y) const {
+	if(x->nodeList.size() != y->nodeList.size()) return x->nodeList.size() < y->nodeList.size();
+	else return x < y;
 }
 
 /**
@@ -53,69 +82,13 @@ DSU::Tsz DSU::num_union() {
 }
 
 /**
- *	@brief	返回当前节点所在集合的大小
- *	@param	Tsz x	: 节点编号
- *	@return 当前所在集合的大小
-**/
-inline
-DSU::Tsz DSU::size_union(Tsz x) {
-	return findRoot(_nodes[x].parent)->nodeList.size();
-}
-
-/**
- *	@brief	返回同一集合中的所有节点
- *	@param	Tsz x	: 节点编号
- *	@return 当前所在集合内的所有节点
-**/
-inline
-std::list<DSU::Tsz> DSU::search_siblings(Tsz x) {
-	return findRoot(_nodes[x].parent)->nodeList;
-}
-
-/**
- *	@brief	返回最小集合内的节点个数
- *	@return 最小集合的大小
-**/
-inline
-DSU::Tsz DSU::size_minSet() {
-	return (*_set.begin())->nodeList.size();
-}
-
-/**
- *	@brief	以列表为容器返回最小集合内的所有节点
- *	@return 最小集合的所有节点
-**/
-inline
-std::list<DSU::Tsz> DSU::search_minSet() {
-	return (*_set.begin())->nodeList;
-}
-
-/**
- *	@brief	返回最大集合内的节点个数
- *	@return 最大集合的大小
-**/
-inline
-DSU::Tsz DSU::size_maxSet() {
-	return (*_set.rbegin())->nodeList.size();
-}
-
-/**
- *	@brief	以列表为容器返回最大集合内的所有节点
- *	@return 最大集合的所有节点
-**/
-inline
-std::list<DSU::Tsz> DSU::search_maxSet() {
-	return (*_set.rbegin())->nodeList;
-}
-
-/**
  *	@brief	判断两个节点是否在一个集合中
  *	@param	Tsz x	: 节点编号1
  *	@param	Tsz y	: 节点编号2
  *	@return	当前节点的根节点
 **/
 inline 
-bool DSU::inSameSet(Tsz x, Tsz y) {
+bool DSU::inSameUnion(Tsz x, Tsz y) {
 	return findRoot(_nodes[x].parent) == findRoot(_nodes[y].parent);
 }
 
@@ -141,14 +114,85 @@ void DSU::unite(Tsz x, Tsz y) {
 }
 
 /**
- *	@brief	_set的比较函数，使用于union排序，方便查看并查集的整体情况
- *	@param	const Union*const& x	: 节点1
- *	@param	const Union*const& y	: 节点2
- *	@return	比较结果
+ *	@brief	返回当前节点所在集合的大小
+ *	@param	Tsz x	: 节点编号
+ *	@return 当前所在集合的大小
 **/
-bool DSU::compare::operator () (const Union*const& x, const Union*const& y) const {
-	if(x->nodeList.size() != y->nodeList.size()) return x->nodeList.size() < y->nodeList.size();
-	else return x < y;
+inline
+DSU::Tsz DSU::size_union(Tsz x) {
+	return findRoot(_nodes[x].parent)->nodeList.size();
+}
+
+/**
+ *	@brief	返回同一集合内的所有节点
+ *	@param	Tsz x	: 节点编号
+ *	@return 当前所在集合内所在链表的引用
+**/
+inline
+const std::list<DSU::Tsz>& DSU::search_siblings(Tsz x) {
+	return findRoot(_nodes[x].parent)->nodeList;
+}
+
+/**
+ *	@brief	返回最小集合内的节点个数
+ *	@return 最小集合的大小
+**/
+inline
+DSU::Tsz DSU::size_minUnion() {
+	return (*_set.begin())->nodeList.size();
+}
+
+/**
+ *	@brief	以列表为容器返回最小集合内的所有节点
+ *	@return 最小集合所在链表的引用
+**/
+inline
+const std::list<DSU::Tsz>& DSU::search_minUnion() {
+	return (*_set.begin())->nodeList;
+}
+
+/**
+ *	@brief	返回最大集合内的节点个数
+ *	@return 最大集合的大小
+**/
+inline
+DSU::Tsz DSU::size_maxUnion() {
+	return (*_set.rbegin())->nodeList.size();
+}
+
+/**
+ *	@brief	以列表为容器返回最大集合内的所有节点
+ *	@return 最大集合所在链表的引用
+**/
+inline
+const std::list<DSU::Tsz>& DSU::search_maxUnion() {
+	return (*_set.rbegin())->nodeList;
+}
+
+/**
+ *	@brief	返回所有集合的大小
+ *	@return 所有集合的大小，存储于vector返回
+**/
+inline 
+std::vector<int> DSU::size_allUnions() {
+	vctInt vct;
+	for(auto item:_set) {
+		vct.push_back(item->nodeList.size());
+	}
+	return vct;
+}
+
+/**
+ *	@brief	返回所有节点，按集合分类并按集合大小排序
+ *	@return 所有集合所在链表的引用，存储于vector返回
+**/
+inline 
+const std::vector<std::list<DSU::Tsz>> DSU::search_allUnions() {
+	vctList vct;
+	for(auto item:_set) {
+		vct.push_back(item->nodeList);
+	}
+	return vct;
 }
 
 /**
